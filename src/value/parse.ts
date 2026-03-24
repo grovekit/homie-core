@@ -13,6 +13,8 @@ import {
 
 import { maybeParseNumber } from '../utils.js';
 
+const DURATION_RE = /^PT(?=\d)(\d+(\.\d+)?H)?(\d+(\.\d+)?M)?(\d+(\.\d+)?S)?$/;
+
 export const parseEnumValue = <F extends EnumFormat>(raw: RawValue, format: F): F['values'][number] | undefined => {
   if (format.values.includes(raw)) {
     return raw;
@@ -55,6 +57,13 @@ export const parseColorValue = (raw: RawValue): ColorValueType | undefined => {
   }
 };
 
+export const parseDurationValue = (raw: RawValue): string | undefined => {
+  if (DURATION_RE.test(raw)) {
+    return raw;
+  }
+  return undefined;
+};
+
 export const parseDatetimeValue = (raw: RawValue): Date | undefined => {
   const date = new Date(raw);
   if (!Number.isNaN(date.valueOf())) {
@@ -79,6 +88,7 @@ export const parseValue = <F extends PropertyFormat>(raw: RawValue, format: F) =
     case 'datetime':
       return parseDatetimeValue(raw);
     case 'duration':
+      return parseDurationValue(raw);
     case 'json':
       return undefined;
   }

@@ -4,11 +4,14 @@ import { RawValue } from './types.js';
 import {
   BooleanFormat,
   DatetimeFormat,
+  DurationFormat,
   EnumFormat,
   PropertyFormat,
   NumericFormat,
   ColorFormat,
 } from '../formats.js';
+
+const DURATION_RE = /^PT(?=\d)(\d+(\.\d+)?H)?(\d+(\.\d+)?M)?(\d+(\.\d+)?S)?$/;
 
 export const serializeEnumValue = (value: any, format: EnumFormat): RawValue | undefined => {
   if (format.values.includes(value)) {
@@ -46,6 +49,13 @@ export const serializeColorValue = (value: any, format: ColorFormat): RawValue |
   return undefined;
 };
 
+export const serializeDurationValue = (value: any, format: DurationFormat): RawValue | undefined => {
+  if (typeof value === 'string' && DURATION_RE.test(value)) {
+    return value as RawValue;
+  }
+  throw new Error(`Invalid duration value: ${value}`);
+};
+
 export const serializeDatetimeValue = (value: any, format: DatetimeFormat): RawValue | undefined => {
   if (value instanceof Date && !Number.isNaN(value.valueOf())) {
     return value.toISOString() as RawValue;
@@ -69,6 +79,7 @@ export const serializeValue = (value: any, format: PropertyFormat): RawValue | u
     case 'datetime':
       return serializeDatetimeValue(value, format);
     case 'duration':
+      return serializeDurationValue(value, format);
     case 'json':
       return undefined;
   }

@@ -7,6 +7,7 @@ import {
   parseNumericValue,
   parseEnumValue,
   parseDatetimeValue,
+  parseDurationValue,
 } from './parse.js';
 import {
   serializeColorValue,
@@ -14,6 +15,7 @@ import {
   serializeNumericValue,
   serializeEnumValue,
   serializeDatetimeValue,
+  serializeDurationValue,
 } from './serialize.js';
 import {
   BooleanFormat,
@@ -21,6 +23,7 @@ import {
   EnumFormat,
   ColorFormat,
   DatetimeFormat,
+  DurationFormat,
 } from '../formats.js';
 
 const raw = (value: string) => value as RawValue;
@@ -321,6 +324,110 @@ describe('Value', () => {
       const parsed = parseColorValue(raw('xyz,0.25,0.34'));
       const serialized = serializeColorValue(parsed, format);
       strictEqual(serialized, 'xyz,0.25,0.34');
+    });
+
+  });
+
+  describe('parseDurationValue', () => {
+
+      it('should parse a full duration with hours, minutes, and seconds', () => {
+        strictEqual(parseDurationValue(raw('PT12H5M46S')), 'PT12H5M46S');
+      });
+
+      it('should parse a duration with only hours', () => {
+        strictEqual(parseDurationValue(raw('PT3H')), 'PT3H');
+      });
+
+      it('should parse a duration with only minutes', () => {
+        strictEqual(parseDurationValue(raw('PT5M')), 'PT5M');
+      });
+
+      it('should parse a duration with only seconds', () => {
+        strictEqual(parseDurationValue(raw('PT30S')), 'PT30S');
+      });
+
+      it('should parse a duration with hours and minutes', () => {
+        strictEqual(parseDurationValue(raw('PT1H30M')), 'PT1H30M');
+      });
+
+      it('should parse a duration with hours and seconds', () => {
+        strictEqual(parseDurationValue(raw('PT1H30S')), 'PT1H30S');
+      });
+
+      it('should parse a duration with minutes and seconds', () => {
+        strictEqual(parseDurationValue(raw('PT5M30S')), 'PT5M30S');
+      });
+
+      it('should parse a duration with decimal seconds', () => {
+        strictEqual(parseDurationValue(raw('PT1.5S')), 'PT1.5S');
+      });
+
+      it('should parse a duration with decimal hours', () => {
+        strictEqual(parseDurationValue(raw('PT1.5H')), 'PT1.5H');
+      });
+
+      it('should parse a duration with decimal minutes', () => {
+        strictEqual(parseDurationValue(raw('PT1.5M')), 'PT1.5M');
+      });
+
+      it('should return undefined for an empty string', () => {
+        strictEqual(parseDurationValue(raw('')), undefined);
+      });
+
+      it('should return undefined for just "PT"', () => {
+        strictEqual(parseDurationValue(raw('PT')), undefined);
+      });
+
+      it('should return undefined for missing PT prefix', () => {
+        strictEqual(parseDurationValue(raw('12H5M46S')), undefined);
+      });
+
+      it('should return undefined for arbitrary strings', () => {
+        strictEqual(parseDurationValue(raw('not-a-duration')), undefined);
+      });
+
+      it('should return undefined for components in wrong order', () => {
+        strictEqual(parseDurationValue(raw('PT5M12H')), undefined);
+      });
+
+      it('should return undefined for negative values', () => {
+        strictEqual(parseDurationValue(raw('PT-5M')), undefined);
+      });
+
+    });
+
+  describe('serializeDurationValue', () => {
+
+    const format: DurationFormat = { datatype: 'duration' };
+
+    it('should serialize a valid duration string', () => {
+      strictEqual(serializeDurationValue('PT12H5M46S', format), 'PT12H5M46S');
+    });
+
+    it('should serialize a duration with only minutes', () => {
+      strictEqual(serializeDurationValue('PT5M', format), 'PT5M');
+    });
+
+    it('should serialize a duration with decimal seconds', () => {
+      strictEqual(serializeDurationValue('PT1.5S', format), 'PT1.5S');
+    });
+
+  });
+
+  describe('duration roundtrip', () => {
+
+    const format: DurationFormat = { datatype: 'duration' };
+
+    it('should roundtrip a full duration', () => {
+      const parsed = parseDurationValue(raw('PT12H5M46S'));
+      strictEqual(parsed, 'PT12H5M46S');
+      strictEqual(serializeDurationValue(parsed, format), 'PT12H5M46S');
+    });
+
+    it('should roundtrip a duration with decimals', () => {
+      const parsed = parseDurationValue(raw('PT1.5S'));
+      strictEqual(parsed, 'PT1.5S');
+      strictEqual(serializeDurationValue(parsed, format), 'PT1.5S');
     });
 
   });
