@@ -57,6 +57,18 @@ export const parseColorValue = (raw: RawValue): ColorValueType | undefined => {
   }
 };
 
+export const parseJsonValue = (raw: RawValue): string | undefined => {
+  try {
+    const parsed = JSON.parse(raw);
+    if (typeof parsed === 'object' && parsed !== null) {
+      return raw;
+    }
+    return undefined;
+  } catch {
+    return undefined;
+  }
+};
+
 export const parseDurationValue = (raw: RawValue): string | undefined => {
   if (DURATION_RE.test(raw)) {
     return raw;
@@ -90,6 +102,6 @@ export const parseValue = <F extends PropertyFormat>(raw: RawValue, format: F) =
     case 'duration':
       return parseDurationValue(raw);
     case 'json':
-      return undefined;
+      return parseJsonValue(raw);
   }
 };

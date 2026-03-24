@@ -6,6 +6,7 @@ import {
   DatetimeFormat,
   DurationFormat,
   EnumFormat,
+  JsonFormat,
   PropertyFormat,
   NumericFormat,
   ColorFormat,
@@ -56,6 +57,18 @@ export const serializeDurationValue = (value: any, format: DurationFormat): RawV
   throw new Error(`Invalid duration value: ${value}`);
 };
 
+export const serializeJsonValue = (value: any, format: JsonFormat): RawValue | undefined => {
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value);
+      if (typeof parsed === 'object' && parsed !== null) {
+        return value as RawValue;
+      }
+    } catch {}
+  }
+  throw new Error(`Invalid JSON value: ${value}`);
+};
+
 export const serializeDatetimeValue = (value: any, format: DatetimeFormat): RawValue | undefined => {
   if (value instanceof Date && !Number.isNaN(value.valueOf())) {
     return value.toISOString() as RawValue;
@@ -81,6 +94,6 @@ export const serializeValue = (value: any, format: PropertyFormat): RawValue | u
     case 'duration':
       return serializeDurationValue(value, format);
     case 'json':
-      return undefined;
+      return serializeJsonValue(value, format);
   }
 };

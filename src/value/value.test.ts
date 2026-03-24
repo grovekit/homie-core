@@ -8,6 +8,7 @@ import {
   parseEnumValue,
   parseDatetimeValue,
   parseDurationValue,
+  parseJsonValue,
 } from './parse.js';
 import {
   serializeColorValue,
@@ -16,6 +17,7 @@ import {
   serializeEnumValue,
   serializeDatetimeValue,
   serializeDurationValue,
+  serializeJsonValue,
 } from './serialize.js';
 import {
   BooleanFormat,
@@ -24,6 +26,7 @@ import {
   ColorFormat,
   DatetimeFormat,
   DurationFormat,
+  JsonFormat,
 } from '../formats.js';
 
 const raw = (value: string) => value as RawValue;
@@ -428,6 +431,104 @@ describe('Value', () => {
       const parsed = parseDurationValue(raw('PT1.5S'));
       strictEqual(parsed, 'PT1.5S');
       strictEqual(serializeDurationValue(parsed, format), 'PT1.5S');
+    });
+
+  });
+
+  describe('parseJsonValue', () => {
+
+      it('should parse a JSON object', () => {
+        strictEqual(parseJsonValue(raw('{"key":"value"}')), '{"key":"value"}');
+      });
+
+      it('should parse a JSON array', () => {
+        strictEqual(parseJsonValue(raw('[1,2,3]')), '[1,2,3]');
+      });
+
+      it('should parse an empty JSON object', () => {
+        strictEqual(parseJsonValue(raw('{}')), '{}');
+      });
+
+      it('should parse an empty JSON array', () => {
+        strictEqual(parseJsonValue(raw('[]')), '[]');
+      });
+
+      it('should parse a nested JSON object', () => {
+        const json = '{"a":{"b":[1,2,3]}}';
+        strictEqual(parseJsonValue(raw(json)), json);
+      });
+
+      it('should return undefined for a JSON string primitive', () => {
+        strictEqual(parseJsonValue(raw('"hello"')), undefined);
+      });
+
+      it('should return undefined for a JSON number primitive', () => {
+        strictEqual(parseJsonValue(raw('42')), undefined);
+      });
+
+      it('should return undefined for a JSON boolean primitive', () => {
+        strictEqual(parseJsonValue(raw('true')), undefined);
+      });
+
+      it('should return undefined for JSON null', () => {
+        strictEqual(parseJsonValue(raw('null')), undefined);
+      });
+
+      it('should return undefined for invalid JSON', () => {
+        strictEqual(parseJsonValue(raw('{not json}')), undefined);
+      });
+
+      it('should return undefined for an empty string', () => {
+        strictEqual(parseJsonValue(raw('')), undefined);
+      });
+
+    });
+
+  describe('serializeJsonValue', () => {
+
+    const format: JsonFormat = { datatype: 'json' };
+
+    it('should serialize a JSON object string', () => {
+      strictEqual(serializeJsonValue('{"key":"value"}', format), '{"key":"value"}');
+    });
+
+    it('should serialize a JSON array string', () => {
+      strictEqual(serializeJsonValue('[1,2,3]', format), '[1,2,3]');
+    });
+
+    it('should serialize an empty JSON object', () => {
+      strictEqual(serializeJsonValue('{}', format), '{}');
+    });
+
+    it('should serialize an empty JSON array', () => {
+      strictEqual(serializeJsonValue('[]', format), '[]');
+    });
+
+  });
+
+  describe('json roundtrip', () => {
+
+    const format: JsonFormat = { datatype: 'json' };
+
+    it('should roundtrip a JSON object', () => {
+      const json = '{"key":"value"}';
+      const parsed = parseJsonValue(raw(json));
+      strictEqual(parsed, json);
+      strictEqual(serializeJsonValue(parsed, format), json);
+    });
+
+    it('should roundtrip a JSON array', () => {
+      const json = '[1,2,3]';
+      const parsed = parseJsonValue(raw(json));
+      strictEqual(parsed, json);
+      strictEqual(serializeJsonValue(parsed, format), json);
+    });
+
+    it('should roundtrip a nested structure', () => {
+      const json = '{"a":{"b":[1,2,3]}}';
+      const parsed = parseJsonValue(raw(json));
+      strictEqual(parsed, json);
+      strictEqual(serializeJsonValue(parsed, format), json);
     });
 
   });
