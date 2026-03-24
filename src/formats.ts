@@ -1,7 +1,6 @@
 
 import { Datatype, PropertyDescription } from "./payloads.js";
-
-type NumberParser = (value: string) => number;
+import { maybeParseNumber, NumberParser } from "./utils.js";
 
 export interface BaseFormat {
   readonly datatype: Datatype;
@@ -81,9 +80,9 @@ export const getNumericPropertyFormat = (datatype: 'integer' | 'float', format: 
     let max: number | undefined = undefined;
     let step: number | undefined = undefined;
     const values = format.split(':');
-    if (values.length > 0) min = parse(values[0]);
-    if (values.length > 1) max = parse(values[1]);
-    if (values.length > 2) step = parse(values[2]);
+    if (values.length > 0) min = maybeParseNumber(values[0], parse);
+    if (values.length > 1) max = maybeParseNumber(values[1], parse);
+    if (values.length > 2) step = maybeParseNumber(values[2], parse);
     return { datatype, min, max, step };
   }
   return { datatype };
