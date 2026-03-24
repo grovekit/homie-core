@@ -5,7 +5,8 @@ import { LOG_LEVEL } from "./enums.js";
 
 export const parse = Object.assign((raw: string): WithRaw<ParsedTopic> | undefined => {
   parse.error = '';
-  const [prefix, version, device, node, property, attribute] = raw.split('/');
+  const segments = raw.split('/');
+  const [prefix, version, device, node, property, attribute] = segments;
   if (!prefix) {
     parse.error = 'invalid prefix segment';
     return;
@@ -21,6 +22,14 @@ export const parse = Object.assign((raw: string): WithRaw<ParsedTopic> | undefin
   if (!device) {
     parse.error = 'invalid device segment';
     return;
+  }
+  if (device === '$broadcast') {
+    const subtopic = segments.slice(3).join('/');
+    if (subtopic.length === 0) {
+      parse.error = 'missing broadcast subtopic';
+      return;
+    }
+    return { raw, type: 'broadcast', prefix, subtopic };
   }
   if (!node) {
     parse.error = 'invalid node segment';

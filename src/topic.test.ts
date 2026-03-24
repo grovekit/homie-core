@@ -138,6 +138,48 @@ describe('Topic', () => {
 
   });
 
+  describe('broadcast topics', () => {
 
+    it('should parse and serialize a broadcast topic with a single-level subtopic', () => {
+      const topic = 'homie/5/$broadcast/alert';
+      const parsed = parse(topic);
+      if (!parsed) throw new Error('invalid');
+      strictEqual(parsed.raw, topic);
+      strictEqual(parsed.type, 'broadcast');
+      strictEqual(parsed.prefix, 'homie');
+      strictEqual(parsed.subtopic, 'alert');
+      strictEqual(stringify(parsed), topic);
+    });
+
+    it('should parse and serialize a broadcast topic with a multi-level subtopic', () => {
+      const topic = 'homie/5/$broadcast/security/alert';
+      const parsed = parse(topic);
+      if (!parsed) throw new Error('invalid');
+      strictEqual(parsed.raw, topic);
+      strictEqual(parsed.type, 'broadcast');
+      strictEqual(parsed.prefix, 'homie');
+      strictEqual(parsed.subtopic, 'security/alert');
+      strictEqual(stringify(parsed), topic);
+    });
+
+    it('should parse and serialize a broadcast topic with a custom prefix', () => {
+      const topic = 'myprefix/5/$broadcast/alert';
+      const parsed = parse(topic);
+      if (!parsed) throw new Error('invalid');
+      strictEqual(parsed.raw, topic);
+      strictEqual(parsed.type, 'broadcast');
+      strictEqual(parsed.prefix, 'myprefix');
+      strictEqual(parsed.subtopic, 'alert');
+      strictEqual(stringify(parsed), topic);
+    });
+
+    it('should not parse a broadcast topic without a subtopic', () => {
+      const topic = 'homie/5/$broadcast';
+      const parsed = parse(topic);
+      strictEqual(parsed, undefined);
+      strictEqual(parse.error, 'missing broadcast subtopic');
+    });
+
+  });
 
 });

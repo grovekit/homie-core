@@ -4,6 +4,7 @@ import { stringify } from "./stringify.js";
 
 export {
   ParsedTopic,
+  BroadcastTopic,
   DeviceAlertTopic,
   DeviceInfoTopic,
   DeviceLogTopic,

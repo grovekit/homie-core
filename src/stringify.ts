@@ -1,6 +1,7 @@
 
 import { ParsedTopic, SerializedTopic } from "./topics.js";
 
+
 export const stringify = (topic: ParsedTopic): SerializedTopic => {
   switch (topic.type) {
     case 'device_state':
@@ -17,6 +18,8 @@ export const stringify = (topic: ParsedTopic): SerializedTopic => {
       return `${topic.prefix}/5/${topic.device}/${topic.node}/${topic.property}` as SerializedTopic;
     case 'property_target':
       return `${topic.prefix}/5/${topic.device}/${topic.node}/${topic.property}/$target` as SerializedTopic;
+    case 'broadcast':
+      return `${topic.prefix}/5/$broadcast/${topic.subtopic}` as SerializedTopic;
     default:
       throw new Error('unknown topic type');
   }

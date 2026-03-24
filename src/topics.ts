@@ -2,9 +2,15 @@
 import { LOG_LEVEL } from "./enums.js";
 
 export interface BaseTopic {
-  type: `device_${'state' | 'info' | 'log' | 'alert'}` | `property_${'set' | 'value' | 'target'}`;
+  type: `device_${'state' | 'info' | 'log' | 'alert'}` | `property_${'set' | 'value' | 'target'}` | 'broadcast';
   device: string;
   prefix: string;
+}
+
+export interface BroadcastTopic {
+  type: 'broadcast';
+  prefix: string;
+  subtopic: string;
 }
 
 export interface DeviceStateTopic extends BaseTopic {
@@ -47,7 +53,7 @@ export interface PropertyTargetTopic extends BaseTopic {
 
 export type PropertyTopic = PropertySetTopic | PropertyValueTopic | PropertyTargetTopic;
 
-export type ParsedTopic = DeviceTopic | PropertyTopic;
+export type ParsedTopic = DeviceTopic | PropertyTopic | BroadcastTopic;
 
 export type SerializedTopic = string & { __topic: true };
 
