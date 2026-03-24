@@ -1,7 +1,7 @@
 
 export enum STRING {
   NULL = '',
-  EMPTY = '0',
+  EMPTY = '\x00',
   TRUE = 'true',
   FALSE = 'false',
 }
