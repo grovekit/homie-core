@@ -18,6 +18,7 @@ import {
   serializeDatetimeValue,
   serializeDurationValue,
   serializeJsonValue,
+  roundToStep,
 } from './serialize.js';
 import {
   BooleanFormat,
@@ -238,6 +239,79 @@ describe('Value', () => {
 
     it('should serialize a string-encoded float', () => {
       strictEqual(serializeNumericValue('3.14', floatFormat), '3.14');
+    });
+
+    it('should round to step before serializing', () => {
+      const format: NumericFormat = { datatype: 'integer', min: 0, max: 10, step: 2 };
+      strictEqual(serializeNumericValue(5, format), '6');
+    });
+
+    it('should round to step and then validate min/max', () => {
+      const format: NumericFormat = { datatype: 'float', min: 0, max: 10, step: 3 };
+      // 10 rounds to 9 (base=0, floor((10-0)/3 + 0.5)*3 + 0 = floor(3.83)*3 = 9), which is within range
+      strictEqual(serializeNumericValue(10, format), '9');
+    });
+
+  });
+
+  describe('roundToStep', () => {
+
+    it('should return the value unchanged when no step is defined', () => {
+      const format: NumericFormat = { datatype: 'integer' };
+      strictEqual(roundToStep(5, format), 5);
+    });
+
+    it('should return the value unchanged when step is zero', () => {
+      const format: NumericFormat = { datatype: 'integer', step: 0 };
+      strictEqual(roundToStep(5, format), 5);
+    });
+
+    it('should round to the nearest step using min as base', () => {
+      const format: NumericFormat = { datatype: 'integer', min: 0, max: 10, step: 2 };
+      strictEqual(roundToStep(5, format), 6);
+    });
+
+    it('should not change a value already on the step grid', () => {
+      const format: NumericFormat = { datatype: 'integer', min: 0, max: 10, step: 2 };
+      strictEqual(roundToStep(4, format), 4);
+    });
+
+    it('should use max as base when min is not defined', () => {
+      const format: NumericFormat = { datatype: 'integer', max: 10, step: 2 };
+      // base = 10; floor((5-10)/2 + 0.5)*2 + 10 = floor(-2 + 0.5)*2 + 10 = -2*2 + 10 = 6
+      strictEqual(roundToStep(5, format), 6);
+    });
+
+    it('should use the value itself as base when neither min nor max is defined', () => {
+      const format: NumericFormat = { datatype: 'integer', step: 3 };
+      // base = value itself = 7; floor((7-7)/3 + 0.5)*3 + 7 = floor(0.5)*3 + 7 = 7
+      strictEqual(roundToStep(7, format), 7);
+    });
+
+    it('should use floor(x + 0.5) rounding (spec example 1)', () => {
+      // Spec example: input 5, format "0:10:2"
+      // base = 0; floor((5-0)/2 + 0.5)*2 + 0 = floor(3)*2 = 6
+      const format: NumericFormat = { datatype: 'integer', min: 0, max: 10, step: 2 };
+      strictEqual(roundToStep(5, format), 6);
+    });
+
+    it('should use floor(x + 0.5) rounding (spec example 2)', () => {
+      // Spec example: input 5, format ":10:2", using floor(x+0.5)
+      // base = 10; floor((5-10)/2 + 0.5)*2 + 10 = floor(-2 + 0.5)*2 + 10 = floor(-1.5)*2 + 10 = -2*2 + 10 = 6
+      const format: NumericFormat = { datatype: 'integer', max: 10, step: 2 };
+      strictEqual(roundToStep(5, format), 6);
+    });
+
+    it('should round float values to step', () => {
+      const format: NumericFormat = { datatype: 'float', min: 0, max: 1, step: 0.25 };
+      strictEqual(roundToStep(0.3, format), 0.25);
+    });
+
+    it('should round to step that can land outside min/max range', () => {
+      // The spec says rounding can push values outside min/max
+      const format: NumericFormat = { datatype: 'integer', min: 0, max: 5, step: 3 };
+      // base = 0; floor((5-0)/3 + 0.5)*3 + 0 = floor(2.17)*3 = 6
+      strictEqual(roundToStep(5, format), 6);
     });
 
   });

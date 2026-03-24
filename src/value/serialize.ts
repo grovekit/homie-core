@@ -28,6 +28,14 @@ export const serializeBooleanValue = (value: any, format: BooleanFormat): RawVal
   throw new Error(`Invalid boolean value: ${value}`);
 };
 
+export const roundToStep = (value: number, format: NumericFormat): number => {
+  if (typeof format.step !== 'number' || format.step <= 0) {
+    return value;
+  }
+  const base = format.min ?? format.max ?? value;
+  return Math.floor((value - base) / format.step + 0.5) * format.step + base;
+};
+
 export const serializeNumericValue = (value: any, format: NumericFormat): RawValue | undefined => {
   if (typeof value === 'string') {
     switch (format.datatype) {
@@ -36,6 +44,9 @@ export const serializeNumericValue = (value: any, format: NumericFormat): RawVal
     }
   }
   if (typeof value === 'number' && !Number.isNaN(value)) {
+    if (typeof format.step === 'number') {
+      value = roundToStep(value, format);
+    }
     if (typeof format.min === 'number' && value < format.min) throw new Error('invalid value (below min)');
     if (typeof format.max === 'number' && value > format.max) throw new Error('invalid value (above max)');
     return String(value) as RawValue;
