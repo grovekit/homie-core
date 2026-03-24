@@ -2,7 +2,7 @@
 import { ValidationErrorItem } from "@deepkit/type";
 import { DeviceStateTopic, WithRaw } from "./topics.js";
 
-export const getAutodiscoveryTopic = (prefix: string) => {
+export const getAutodiscoveryTopic = (prefix: string = '+') => {
   return `${prefix}/5/+/$state`;
 };
 
