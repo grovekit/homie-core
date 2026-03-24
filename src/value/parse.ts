@@ -31,14 +31,27 @@ export const parseNumericValue = (raw: RawValue, format: NumericFormat): number 
   return parsed;
 };
 
-export const parseColorValue = (raw: RawValue): ColorValueType => {
+export const parseColorValue = (raw: RawValue): ColorValueType | undefined => {
   const parts = raw.split(',');
   switch (parts[0]) {
-    case 'rgb': return parts as ColorValueType;
-    case 'hsv': return parts as ColorValueType;
-    case 'xyz': return parts as ColorValueType;
+    case 'rgb':
+    case 'hsv': {
+      if (parts.length !== 4) return undefined;
+      const a = parseFloat(parts[1]);
+      const b = parseFloat(parts[2]);
+      const c = parseFloat(parts[3]);
+      if (Number.isNaN(a) || Number.isNaN(b) || Number.isNaN(c)) return undefined;
+      return [parts[0], a, b, c];
+    }
+    case 'xyz': {
+      if (parts.length !== 3) return undefined;
+      const x = parseFloat(parts[1]);
+      const y = parseFloat(parts[2]);
+      if (Number.isNaN(x) || Number.isNaN(y)) return undefined;
+      return [parts[0], x, y];
+    }
     default:
-      throw new Error(`Invalid color format: ${raw}`);
+      return undefined;
   }
 };
 
