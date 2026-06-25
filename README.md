@@ -287,6 +287,8 @@ getDeviceWildcardTopic(parsedDeviceStateTopic);
 ## Building
 
 ```sh
+npm install
+npx runtyped-install-transformer
 npm run ts:build   # Clean build
 npm run ts:watch   # Watch mode
 npm run ts:clean   # Remove build artifacts

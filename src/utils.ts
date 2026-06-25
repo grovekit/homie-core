@@ -1,5 +1,5 @@
 
-import { ValidationErrorItem } from "@deepkit/type";
+import { ValidationErrorItem } from "@runtyped/type";
 import { DeviceStateTopic, WithRaw } from "./topics.js";
 
 export const getAutodiscoveryTopic = (prefix: string = '+') => {

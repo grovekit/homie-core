@@ -1,5 +1,5 @@
 
-import { is } from "@deepkit/type";
+import { is } from "@runtyped/type";
 import { ParsedTopic, WithRaw } from "./topics.js";
 import { LOG_LEVEL } from "./enums.js";
 
